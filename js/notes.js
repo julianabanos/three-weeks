@@ -8,7 +8,7 @@ function createStickyNote() {
     note.id = "note_" + noteId;
     note.innerHTML = `
         <div class="header">
-            <span class="delete" onclick="deleteStickyNote('${note.id}')" >X</span>
+            <span class="delete" onclick="deleteStickyNote('${note.id}')" >Delete</span>
         </div>
         <div class="content" spellcheck="false" contenteditable="true" onclick="hidePlaceholder(this)">Add here!</div>
         <input type="color" class="color-picker" onchange="changeNoteColor('${note.id}', this.value)">
