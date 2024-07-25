@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Te amo</title>
+    <link rel="stylesheet" href="css/first.css">
+</head>
+<body>
+    <div class="container">
+        <h1>I have a surprise for you!</h1>
+        <p>But first I need to check if you are the person this little website is intended for, <br> To do so please answer every question carefully. If you're not sure what to answer, <br> You should know who to ask! Oh, and remember, <b>funny answers only.</b> <br>PS: try answering wrong *wink*</p>
+        <form id="questionForm">
+            <label for="answer"><b>1. How long have you known me for?</b></label><br>
+            <input type="text" id="answer" name="answer">
+            <button type="submit">Check</button>
+        </form>
+    </div>
+    <div id="customAlert" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <p id="alertMessage"></p>
+        </div>
+    </div>
+    <script src="js/first.js"></script>
+</body>
+</html>
