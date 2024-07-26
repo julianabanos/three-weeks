@@ -1,6 +1,6 @@
 let noteId = 0;
-let occupiedPositions = [];
 
+// Create a new sticky note and save it to Firestore
 function createStickyNote() {
     const container = document.getElementById("container");
     const note = document.createElement("div");
@@ -8,28 +8,39 @@ function createStickyNote() {
     note.id = "note_" + noteId;
     note.innerHTML = `
         <div class="header">
-            <span class="delete" onclick="deleteStickyNote('${note.id}')" >Delete</span>
+            <span class="delete" onclick="deleteStickyNote('${note.id}')">Delete</span>
         </div>
-        <div class="content" spellcheck="false" contenteditable="true" onclick="hidePlaceholder(this)">Add here!</div>
-        <input type="color" class="color-picker" onchange="changeNoteColor('${note.id}', this.value)">
-    `
-     saveNotesToLocalStorage();
+        <div class="content" spellcheck="false" contenteditable="true" oninput="updateNoteContent('${note.id}')">Add here!</div>
+        <input type="color" class="color-picker" onchange="changeNoteColor('${note.id}', this.value)" value="#F4F4F4">
+    `;
+    note.style.top = "100px";
+    note.style.left = "100px";
+    note.style.backgroundColor = "#F4F4F4";
 
+    const newNote = {
+        id: note.id,
+        content: "Add here!",
+        top: note.style.top,
+        left: note.style.left,
+        color: "#F4F4F4"
+    };
+
+    saveNoteToFirestore(newNote);
     noteId++;
     note.addEventListener("mousedown", startDrag);
     container.appendChild(note);
-    saveNotesToLocalStorage();
 }
 
-function hidePlaceholder(element) {
-    if (element.innerText === "Add here!") {
-        element.innerText = "";
-       saveNotesToLocalStorage();
-    }
+// Update the content of a note
+function updateNoteContent(noteId) {
+    const note = document.getElementById(noteId);
+    const content = note.querySelector(".content").innerText;
+    updateNoteInFirestore(noteId, { content: content });
 }
 
+// Start dragging a note
 function startDrag(event) {
-    const note = event.target;
+    const note = event.target.closest(".note");
     const mouseX = event.clientX;
     const mouseY = event.clientY;
     const noteX = note.offsetLeft;
@@ -39,7 +50,6 @@ function startDrag(event) {
 
     document.addEventListener("mousemove", dragNote);
     document.addEventListener("mouseup", stopDrag);
-    saveNotesToLocalStorage();
 
     function dragNote(event) {
         if (event.target.tagName.toLowerCase() === 'input' || event.target.tagName.toLowerCase() === 'textarea') {
@@ -50,66 +60,87 @@ function startDrag(event) {
         const newNoteY = event.clientY - offsetY;
         note.style.left = newNoteX + "px";
         note.style.top = newNoteY + "px";
-        saveNotesToLocalStorage();
+        updateNoteInFirestore(note.id, { left: note.style.left, top: note.style.top });
     }
 
     function stopDrag() {
         document.removeEventListener("mousemove", dragNote);
         document.removeEventListener("mouseup", stopDrag);
-        saveNotesToLocalStorage();
     }
 }
 
+// Delete a note from Firestore
 function deleteStickyNote(noteId) {
-    const deleteButton = event.target;
-    if (deleteButton.classList.contains("delete")) {
-        const note = deleteButton.parentNode.parentNode;
-        note.remove();
-        saveNotesToLocalStorage();
-    }
+    const note = document.getElementById(noteId);
+    note.remove();
+    deleteNoteFromFirestore(noteId);
 }
 
-function saveNotesToLocalStorage() {
-    const notes = document.getElementsByClassName("note");
-    const notesArray = Array.from(notes).map(note => ({
-        id: note.id,
-        content: note.querySelector(".content").innerText,
-        top: note.style.top,
-        left: note.style.left,
-        color: note.querySelector(".color-picker").value // Retrieve color value from the color picker
-    }));
-    localStorage.setItem("stickyNotes", JSON.stringify(notesArray));
+// Change the color of a note
+function changeNoteColor(noteId, color) {
+    const note = document.getElementById(noteId);
+    note.style.backgroundColor = color;
+    updateNoteInFirestore(noteId, { color: color });
 }
 
-function loadNotesFromLocalStorage() {
-    const savedNotes = localStorage.getItem("stickyNotes");
-    if (savedNotes) {
-        const notesArray = JSON.parse(savedNotes);
-        notesArray.forEach(note => {
+// Save a new note to Firestore
+function saveNoteToFirestore(note) {
+    db.collection("notes").doc(note.id).set(note)
+        .then(() => {
+            console.log("Note successfully written!");
+        })
+        .catch((error) => {
+            console.error("Error writing note: ", error);
+        });
+}
+
+// Update a note in Firestore
+function updateNoteInFirestore(noteId, update) {
+    db.collection("notes").doc(noteId).update(update)
+        .then(() => {
+            console.log("Note successfully updated!");
+        })
+        .catch((error) => {
+            console.error("Error updating note: ", error);
+        });
+}
+
+// Delete a note from Firestore
+function deleteNoteFromFirestore(noteId) {
+    db.collection("notes").doc(noteId).delete()
+        .then(() => {
+            console.log("Note successfully deleted!");
+        })
+        .catch((error) => {
+            console.error("Error deleting note: ", error);
+        });
+}
+
+// Load notes from Firestore and display them
+function loadNotesFromFirestore() {
+    db.collection("notes").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const note = doc.data();
             const container = document.getElementById("container");
             const newNote = document.createElement("div");
             newNote.className = "note";
             newNote.id = note.id;
             newNote.innerHTML = `
                 <div class="header">
-                    <button class="delete" onclick="deleteStickyNote('${note.id}')" contenteditable="false">Delete</button>
+                    <span class="delete" onclick="deleteStickyNote('${note.id}')">Delete</span>
                 </div>
-                <div class="content" contenteditable="true">${note.content}</div>
+                <div class="content" spellcheck="false" contenteditable="true" oninput="updateNoteContent('${note.id}')">${note.content}</div>
                 <input type="color" class="color-picker" onchange="changeNoteColor('${note.id}', this.value)" value="${note.color}">
             `;
             newNote.style.top = note.top;
             newNote.style.left = note.left;
-            newNote.style.backgroundColor = note.color; // Set background color
+            newNote.style.backgroundColor = "#999900";
             newNote.addEventListener("mousedown", startDrag);
             container.appendChild(newNote);
         });
-    }
+    });
 }
 
-function changeNoteColor(noteId, color) {
-    const note = document.getElementById(noteId);
-    note.style.backgroundColor = color;
-    saveNotesToLocalStorage();
-}
+window.addEventListener("DOMContentLoaded", loadNotesFromFirestore);
 
-window.addEventListener("DOMContentLoaded", loadNotesFromLocalStorage);
+

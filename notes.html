@@ -1,9 +1,52 @@
+<!-- <html>
+<head>
+    <link rel="icon" href="https://lh3.googleusercontent.com/pw/AJFCJaWk2ppiixRneO28N-j_c1aLow6p-VW9-4eUZAFWompL_NBkjhkkxCtSYytT-31D1t4E9907mMfCnmIuvLDtzvSp8NIhNI3Imse2ZjrkFNOkEx93QTatf1jujgjUSUqLA0v6RVMZUEX4LWS2UnrXI0CE=w32-h32-s-no?authuser=0" type="image/x-icon">
+    <title>Happy 100 days!</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap">
+</head>
+<body>
+    <h1> Highlights of us! </h1>
+
+    <div id="container">
+
+    </div>
+
+    <div class="container-buttons">
+        <button onclick="createStickyNote()">Add</button>
+    </div>
+
+    <script src="js/notes.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="icon" href="https://lh3.googleusercontent.com/pw/AJFCJaWk2ppiixRneO28N-j_c1aLow6p-VW9-4eUZAFWompL_NBkjhkkxCtSYytT-31D1t4E9907mMfCnmIuvLDtzvSp8NIhNI3Imse2ZjrkFNOkEx93QTatf1jujgjUSUqLA0v6RVMZUEX4LWS2UnrXI0CE=w32-h32-s-no?authuser=0" type="image/x-icon">
     <title>Happy 100 days!</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCls0zDQTyoqz4sQ2rq7mNmPXPaF9L24-w",
+            authDomain: "three-weeks-d9b56.firebaseapp.com",
+            projectId: "three-weeks-d9b56",
+            storageBucket: "three-weeks-d9b56.appspot.com",
+            messagingSenderId: "953617750842",
+            appId: "1:953617750842:web:5df2b7a0641f029b850e03",
+            measurementId: "G-HPHCPL7T6S"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+    </script>
 </head>
 <body>
     <h1> Highlights of us! </h1>
