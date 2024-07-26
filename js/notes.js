@@ -77,10 +77,28 @@ function deleteStickyNote(noteId) {
 }
 
 // Change the color of a note
+// function changeNoteColor(noteId, color) {
+//     const note = document.getElementById(noteId);
+//     note.style.backgroundColor = color;
+//     updateNoteInFirestore(noteId, { color: color });
+// }
+
 function changeNoteColor(noteId, color) {
-    const note = document.getElementById(noteId);
-    note.style.backgroundColor = color;
-    updateNoteInFirestore(noteId, { color: color });
+    // Update the color in Firestore
+    db.collection("notes").doc(noteId).update({
+        color: color
+    }).then(() => {
+        console.log("Color updated in Firestore:", color);
+    }).catch((error) => {
+        console.error("Error updating color in Firestore:", error);
+    });
+
+    // Apply the new color to the note element immediately
+    const noteElement = document.getElementById(noteId);
+    if (noteElement) {
+        noteElement.style.backgroundColor = color;
+        noteElement.style.setProperty('background-color', color, 'important'); // Force apply the background color
+    }
 }
 
 // Save a new note to Firestore
@@ -116,11 +134,38 @@ function deleteNoteFromFirestore(noteId) {
         });
 }
 
+// // Load notes from Firestore and display them
+// function loadNotesFromFirestore() {
+//     db.collection("notes").get().then((querySnapshot) => {
+//         querySnapshot.forEach((doc) => {
+//             const note = doc.data();
+//             const container = document.getElementById("container");
+//             const newNote = document.createElement("div");
+//             newNote.className = "note";
+//             newNote.id = note.id;
+//             newNote.innerHTML = `
+//                 <div class="header">
+//                     <span class="delete" onclick="deleteStickyNote('${note.id}')">Delete</span>
+//                 </div>
+//                 <div class="content" spellcheck="false" contenteditable="true" oninput="updateNoteContent('${note.id}')">${note.content}</div>
+//                 <input type="color" class="color-picker" onchange="changeNoteColor('${note.id}', this.value)" value="${note.color}">
+//             `;
+//             newNote.style.top = note.top;
+//             newNote.style.left = note.left;
+//             newNote.style.backgroundColor = note.color;
+//             newNote.addEventListener("mousedown", startDrag);
+//             container.appendChild(newNote);
+//         });
+//     });
+// }
+
 // Load notes from Firestore and display them
 function loadNotesFromFirestore() {
     db.collection("notes").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
             const note = doc.data();
+            console.log("Note data:", note); // Debugging: Log the note data
+
             const container = document.getElementById("container");
             const newNote = document.createElement("div");
             newNote.className = "note";
@@ -134,13 +179,17 @@ function loadNotesFromFirestore() {
             `;
             newNote.style.top = note.top;
             newNote.style.left = note.left;
-            newNote.style.backgroundColor = "#999900";
+            newNote.style.backgroundColor = note.color;
+            newNote.style.setProperty('background-color', note.color, 'important'); // Force apply the background color
+            console.log("Applied color:", note.color); // Debugging: Log the applied color
+
             newNote.addEventListener("mousedown", startDrag);
             container.appendChild(newNote);
         });
+    }).catch((error) => {
+        console.error("Error loading notes from Firestore:", error); // Debugging: Log any errors
     });
 }
-
 window.addEventListener("DOMContentLoaded", loadNotesFromFirestore);
 
 
